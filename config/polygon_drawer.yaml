@@ -1,2 +1,2 @@
-source_image_dir: "/mnt/mydata/colgate_projects/data/dvr3_random"
+source_image_dir: "/mydata/image_dir"
 results_dir: "../results"
