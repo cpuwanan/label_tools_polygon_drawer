@@ -17,9 +17,10 @@ public:
 	void addRegion(std::string id, MyPolygon polygon);
 	void draw(cv::Mat &image);
 	void deleteLastRegion();
-	void deleteRegionById(std::string name);
+	void deleteRegionById(std::string id);
+	void editRegionById(std::string id, std::string name);
 	std::string getTextInfo();
-	void setActiveRegion(std::string name);
+	void setActiveRegion(std::string id);
 	void mouseSelectPoint(cv::Point pt);
 	void mouseMovePoint(cv::Point pt);
 	void mouseRelease();
