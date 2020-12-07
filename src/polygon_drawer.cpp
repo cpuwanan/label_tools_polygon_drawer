@@ -187,6 +187,15 @@ public:
 							current_drawer_.deleteLastRegion();
 							break;
 						}
+						case 'e': {
+							std::string id, name;
+							std::cout << "Enter a region id: ";
+							std::cin >> id;
+							std::cout << "Enter a new name (spacebar is not allowed !!!) : ";
+							std::cin >> name;
+							current_drawer_.editRegionById(id, name);
+							break;
+						}
 					}
 				}
 			}
