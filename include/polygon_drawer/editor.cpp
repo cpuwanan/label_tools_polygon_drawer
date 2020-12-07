@@ -29,7 +29,7 @@ void MyPolygonDrawer::reset()
 	
 	// Assume 20 regions
 	for (int i=0; i<20; i++) {
-		colors_.push_back(cv::Scalar(rand() % 100 + 150, rand() % 100 + 150, rand() % 100 + 150));
+		colors_.push_back(cv::Scalar(rand() % 200, rand() % 200, rand() % 200));
 	}
 }
 
@@ -79,20 +79,37 @@ void MyPolygonDrawer::deleteLastRegion()
 	polygons_.erase(it);
 }
 
-void MyPolygonDrawer::deleteRegionById(std::string name)
+void MyPolygonDrawer::deleteRegionById(std::string id)
 {
 	if (!this->isOk()) return;
 
-	std::map<std::string, MyPolygon>::iterator it = polygons_.find(name);
+	std::map<std::string, MyPolygon>::iterator it = polygons_.find(id);
 	if (it != polygons_.end()) {
 		polygons_.erase(it);
 		std::cout << utils::getBashColorText(" Deleting the region name: " + it->first, 'y', 'b') << std::endl;
 	}
 }
 
-void MyPolygonDrawer::setActiveRegion(std::string name)
+void MyPolygonDrawer::editRegionById(std::string id, std::string name)
 {
-	last_active_region_ = name;
+	if (!this->isOk()) return;
+
+	if (name == "") return;
+	
+	std::map<std::string, MyPolygon>::iterator it = polygons_.find(id);
+	if (it != polygons_.end()) {
+		it->second.id = name;
+		MyPolygon polygon = it->second;
+		std::string text = cv::format("id '%s' was assigned a new name '%s'", it->first.c_str(), it->second.id.c_str());
+		polygons_.erase(it);
+		polygons_.insert(std::pair<std::string, MyPolygon>(name, polygon));
+		std::cout << utils::getBashColorText(text, 'y', 'b') << std::endl;
+	}
+}
+
+void MyPolygonDrawer::setActiveRegion(std::string id)
+{
+	last_active_region_ = id;
 }
 
 void MyPolygonDrawer::mouseSelectPoint(cv::Point pt)
@@ -154,7 +171,9 @@ void MyPolygonDrawer::draw(cv::Mat& image)
 	std::map<std::string, MyPolygon>::iterator it;
 	for (it = polygons_.begin(); it != polygons_.end(); it++, region_index++) {
 		if (true) {
-			cv::Scalar color = colors_[region_index % int(colors_.size())]; // cv::Scalar(255, 255, 255); // 
+			//cv::Scalar color = colors_[region_index % int(colors_.size())]; // cv::Scalar(255, 255, 255); //
+			cv::Scalar color(0, 255, 0);
+			
 			int min_y = image.rows;
 			int min_y_index = 0;
 			for (int k = 0; k < it->second.points.size(); k++) {
@@ -173,12 +192,19 @@ void MyPolygonDrawer::draw(cv::Mat& image)
 			}
 			int fontFace = cv::FONT_HERSHEY_SIMPLEX;
 			double fontScale = 0.6;
-			int thickness = 2;
+			int thickness = 1;
 			cv::Point textpt(
 				it->second.points[min_y_index].x * image.cols,
 				it->second.points[min_y_index].y * image.rows
 			);
-			cv::putText(image, it->second.id, textpt, fontFace, fontScale, color, thickness);
+			int baseline = 0;
+			cv::Size textsize = cv::getTextSize(it->second.id, fontFace, fontScale, thickness, &baseline);
+			cv::Rect textRect(
+				textpt.x, textpt.y - textsize.height - baseline,
+				textsize.width, textsize.height + 2 * baseline
+			);
+			cv::rectangle(image, textRect, color, -1);
+			cv::putText(image, it->second.id, textpt, fontFace, fontScale, cv::Scalar(0, 0, 0), thickness);
 		}
 	}	
 }
